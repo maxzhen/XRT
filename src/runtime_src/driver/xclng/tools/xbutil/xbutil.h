@@ -163,11 +163,11 @@ class device {
     xclErrorStatus m_errinfo;
 
 public:
-    int domain() { return pcidev::get_dev(m_idx)->mgmt->domain; }
-    int bus() { return pcidev::get_dev(m_idx)->mgmt->bus; }
-    int dev() { return pcidev::get_dev(m_idx)->mgmt->dev; }
+    int domain() { return pcidev::get_dev(m_idx)->user->domain; }
+    int bus() { return pcidev::get_dev(m_idx)->user->bus; }
+    int dev() { return pcidev::get_dev(m_idx)->user->dev; }
     int userFunc() { return pcidev::get_dev(m_idx)->user->func; }
-    int mgmtFunc() { return pcidev::get_dev(m_idx)->mgmt->func; }
+    int mgmtFunc() { return 0; }
     device(unsigned int idx, const char* log) : m_idx(idx), m_handle(nullptr), m_devinfo{} {
         std::string devstr = "device[" + std::to_string(m_idx) + "]";
         m_handle = xclOpen(m_idx, log, XCL_QUIET);
@@ -615,12 +615,14 @@ public:
         sensor_tree::put( "board.info.mig_calibrated", m_devinfo.mMigCalib );
         {
             std::string idcode, fpga, dna, errmsg;
+#if 0
             pcidev::get_dev(m_idx)->mgmt->sysfs_get("icap", "idcode", errmsg, idcode);
             sensor_tree::put( "board.info.idcode", idcode );
             pcidev::get_dev(m_idx)->mgmt->sysfs_get("rom", "FPGA", errmsg, fpga);
             sensor_tree::put( "board.info.fpga_name", fpga );
             pcidev::get_dev(m_idx)->mgmt->sysfs_get("dna", "dna", errmsg, dna);
             sensor_tree::put( "board.info.dna", dna);
+#endif
         }
         
 

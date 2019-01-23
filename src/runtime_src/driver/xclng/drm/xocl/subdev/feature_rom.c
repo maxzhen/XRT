@@ -294,19 +294,44 @@ static int feature_rom_probe(struct platform_device *pdev)
 			rom->header.DDRChannelSize = 16;
 			rom->header.FeatureBitMap = 0x0;
 			rom->header.FeatureBitMap = UNIFIED_PLATFORM;
-			rom->unified = true;
-			rom->aws_dev = true;
-
 			xocl_info(&pdev->dev, "Enabling AWS dynamic 5.0 DSA");
+		} else if (vendor == 0x1ded && did == 0x1004) {
+			xocl_info(&pdev->dev,
+				"Found Aliyun F3 Device without featureROM");
+			/*
+ 			 * This is AWS device. Fill the FeatureROM struct.
+ 			 * Right now it doesn't have FeatureROM
+ 			 */
+			memset(rom->header.EntryPointString, 0,
+				sizeof(rom->header.EntryPointString));
+			strncpy(rom->header.EntryPointString, "xlnx", 4);
+			memset(rom->header.FPGAPartName, 0,
+				sizeof(rom->header.FPGAPartName));
+			strncpy(rom->header.FPGAPartName, "aliyun-f3", 9);
+			memset(rom->header.VBNVName, 0,
+				sizeof(rom->header.VBNVName));
+			strncpy(rom->header.VBNVName,
+				"xilinx_aliyun-f3_dynamic_5_0", 28);
+			rom->header.MajorVersion = 4;
+			rom->header.MinorVersion = 0;
+			rom->header.VivadoBuildID = 0xabcd;
+			rom->header.IPBuildID = 0xabcd;
+			rom->header.TimeSinceEpoch = 0xabcd;
+			rom->header.DDRChannelCount = 4;
+			rom->header.DDRChannelSize = 16;
+			rom->header.FeatureBitMap = 0x0;
+			rom->header.FeatureBitMap = UNIFIED_PLATFORM;
+			xocl_info(&pdev->dev, "Enabling Aliyun F3 dynamic 5.0 DSA");
 		} else {
 			xocl_err(&pdev->dev, "Magic number does not match, "
 			"actual 0x%x, expected 0x%x", val, MAGIC_NUM);
 			ret = -ENODEV;
 			goto failed;
 		}
+	} else {
+		memcpy_fromio(&rom->header, rom->base, sizeof(rom->header));
 	}
 
-	memcpy_fromio(&rom->header, rom->base, sizeof(rom->header));
 	if (strstr(rom->header.VBNVName, "-xare")) {
 		/*
 		 * ARE device, ARE is mapped like another DDR inside FPGA;
@@ -315,6 +340,9 @@ static int feature_rom_probe(struct platform_device *pdev)
 		rom->header.DDRChannelCount = rom->header.DDRChannelCount - 1;
 		rom->are_dev = true;
 	}
+
+	if (strstr(rom->header.VBNVName,"xilinx_aws-"))
+		rom->aws_dev = true;
 
 	rom->dsa_version = 0;
 	if (strstr(rom->header.VBNVName,"5_0"))

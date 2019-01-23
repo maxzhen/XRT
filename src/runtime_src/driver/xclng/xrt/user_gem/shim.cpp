@@ -213,7 +213,7 @@ void xocl::XOCLShim::init(unsigned index, const char *logfileName,
         mLogStream << __func__ << ", " << std::this_thread::get_id()
             << std::endl;
     }
-
+#if 0
     std::string mgmtFile = "/dev/xclmgmt"+ std::to_string(dev->mgmt->instance);
     mMgtHandle = open(mgmtFile.c_str(), O_RDWR | O_SYNC);
     if(mMgtHandle < 0) {
@@ -238,6 +238,7 @@ void xocl::XOCLShim::init(unsigned index, const char *logfileName,
     } else {
         mAioEnabled = true;
     }
+#endif
 }
 
 /*
@@ -569,6 +570,7 @@ int xocl::XOCLShim::xclCopyBO(unsigned int dst_boHandle, unsigned int src_boHand
  */
 void xocl::XOCLShim::xclSysfsGetErrorStatus(xclErrorStatus& stat)
 {
+#if 0
     std::string errmsg;
     unsigned int status;
     unsigned int level;
@@ -589,6 +591,7 @@ void xocl::XOCLShim::xclSysfsGetErrorStatus(xclErrorStatus& stat)
         stat.mAXIErrorStatus[level].mErrFirewallStatus = status;
         stat.mAXIErrorStatus[level].mErrFirewallTime = time;
     }
+#endif
 }
 
 /*
@@ -611,26 +614,26 @@ void xocl::XOCLShim::xclSysfsGetDeviceInfo(xclDeviceInfo2 *info)
     std::string s;
     std::string errmsg;
     auto dev = pcidev::get_dev(mBoardNumber);
-
-    dev->mgmt->sysfs_get("", "vendor", errmsg, info->mVendorId);
-    dev->mgmt->sysfs_get("", "device", errmsg, info->mDeviceId);
-    dev->mgmt->sysfs_get("", "subsystem_device", errmsg, info->mSubsystemId);
+    dev->user->sysfs_get("", "vendor", errmsg, info->mVendorId);
+    dev->user->sysfs_get("", "device", errmsg, info->mDeviceId);
+    dev->user->sysfs_get("", "subsystem_device", errmsg, info->mSubsystemId);
     info->mDeviceVersion = info->mSubsystemId & 0xff;
-    dev->mgmt->sysfs_get("", "subsystem_vendor", errmsg, info->mSubsystemVendorId);
+    dev->user->sysfs_get("", "subsystem_vendor", errmsg, info->mSubsystemVendorId);
     info->mDataAlignment = getpagesize();
-    dev->mgmt->sysfs_get("rom", "ddr_bank_size", errmsg, info->mDDRSize);
+    dev->user->sysfs_get("rom", "ddr_bank_size", errmsg, info->mDDRSize);
     info->mDDRSize = GB(info->mDDRSize);
 
-    dev->mgmt->sysfs_get("rom", "VBNV", errmsg, s);
+    dev->user->sysfs_get("rom", "VBNV", errmsg, s);
     snprintf(info->mName, sizeof (info->mName), "%s", s.c_str());
-    dev->mgmt->sysfs_get("rom", "FPGA", errmsg, s);
+    dev->user->sysfs_get("rom", "FPGA", errmsg, s);
     snprintf(info->mFpga, sizeof (info->mFpga), "%s", s.c_str());
-    dev->mgmt->sysfs_get("rom", "timestamp", errmsg, info->mTimeStamp);
-    dev->mgmt->sysfs_get("rom", "ddr_bank_count_max", errmsg, info->mDDRBankCount);
+    dev->user->sysfs_get("rom", "timestamp", errmsg, info->mTimeStamp);
+    dev->user->sysfs_get("rom", "ddr_bank_count_max", errmsg, info->mDDRBankCount);
     info->mDDRSize *= info->mDDRBankCount;
 
     info->mNumClocks = numClocks(info->mName);
 
+#if 0
     dev->mgmt->sysfs_get("", "link_width", errmsg, info->mPCIeLinkWidth);
     dev->mgmt->sysfs_get("", "link_speed", errmsg, info->mPCIeLinkSpeed);
     dev->mgmt->sysfs_get("", "link_speed_max", errmsg, info->mPCIeLinkSpeedMax);
@@ -685,7 +688,7 @@ void xocl::XOCLShim::xclSysfsGetDeviceInfo(xclDeviceInfo2 *info)
         i++) {
         info->mOCLFrequency[i] = freqs[i];
     }
-
+#endif
     // Below info from user pf.
     if (dev->is_ready) {
         dev->user->sysfs_get("mb_scheduler", "kds_numcdmas",
@@ -856,7 +859,7 @@ int xocl::XOCLShim::xclLoadXclBin(const xclBin *buffer)
         }
         return -EINVAL;
     }
-
+#if 0
     if( ret != 0 ) {
         std::string errmsg;
         std::string line;
@@ -865,7 +868,7 @@ int xocl::XOCLShim::xclLoadXclBin(const xclBin *buffer)
             "", "error", errmsg, line);
         std::cout << line << std::endl;
     }
-
+#endif
     mIsDebugIpLayoutRead = false;
 
     return ret;
@@ -884,14 +887,14 @@ int xocl::XOCLShim::xclLoadAxlf(const axlf *buffer)
          std::cout << __func__ << " ERROR: Device is not locked" << std::endl;
         return -EPERM;
     }
-
+#if 0
     const unsigned cmd = XCLMGMT_IOCICAPDOWNLOAD_AXLF;
     xclmgmt_ioc_bitstream_axlf obj = {const_cast<axlf *>(buffer)};
     int ret = ioctl(mMgtHandle, cmd, &obj);
     if(ret) {
         return ret ? -errno : ret;
     }
-
+#endif
     // If it is an XPR DSA, zero out the DDR again as downloading the XCLBIN
     // reinitializes the DDR and results in ECC error.
     if(isXPR())
@@ -916,7 +919,7 @@ int xocl::XOCLShim::xclLoadAxlf(const axlf *buffer)
     //return -EPERM;
 
     drm_xocl_axlf axlf_obj = {const_cast<axlf *>(buffer)};
-    ret = ioctl(mUserHandle, DRM_IOCTL_XOCL_READ_AXLF, &axlf_obj);
+    int ret = ioctl(mUserHandle, DRM_IOCTL_XOCL_READ_AXLF, &axlf_obj);
     return ret ? -errno : ret;
 }
 
@@ -1069,7 +1072,11 @@ int xocl::XOCLShim::xclGetUsageInfo(xclDeviceUsage *info)
  * isGood()
  */
 bool xocl::XOCLShim::isGood() const {
+#if 0
     return (mUserHandle >= 0) && (mMgtHandle >= 0);
+#else
+    return (mUserHandle >= 0);
+#endif
 }
 
 /*

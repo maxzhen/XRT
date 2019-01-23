@@ -623,13 +623,14 @@ xocl_read_axlf_helper(struct xocl_dev *xdev, struct drm_xocl_axlf *axlf_ptr)
 	}
 
 	userpf_info(xdev, "%s:%d\n", __FILE__, __LINE__);
+#if 0
 	//Ignore timestamp matching for AWS platform
 	if (!xocl_is_aws(xdev) && !xocl_verify_timestamp(xdev,
 		bin_obj.m_header.m_featureRomTimeStamp)) {
 		printk(KERN_ERR "TimeStamp of ROM did not match Xclbin\n");
 		return -EINVAL;
 	}
-
+#endif
 	printk(KERN_INFO "XOCL: VBNV and TimeStamps matched\n");
 
 	err = xocl_icap_lock_bitstream(xdev, &bin_obj.m_header.uuid,

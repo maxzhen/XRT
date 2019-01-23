@@ -31,6 +31,7 @@
 // Supported vendors
 #define XILINX_ID    0x10ee
 #define ADVANTECH_ID 0x13fe
+#define ALIYUN_F3_ID 0x1ded
 
 static const std::string sysfs_root = "/sys/bus/pci/devices/";
 
@@ -294,7 +295,7 @@ pcidev::pci_func::pci_func(const std::string& sysfs) : sysfs_name(sysfs)
         std::cout << err << std::endl;
         return;
     }
-    if((vendor != XILINX_ID) && (vendor != ADVANTECH_ID))
+    if ((vendor != XILINX_ID) && (vendor != ADVANTECH_ID) && (vendor != ALIYUN_F3_ID))
         return;
 
     device = subdevice = INVALID_ID;
@@ -429,6 +430,15 @@ static int add_to_device_list(
             }
         }
     }
+
+    // Aliyun F3 has only user pf
+    for (auto &udev : user_devices) {
+        auto mdev = std::unique_ptr<pcidev::pci_func>(nullptr);
+        auto dev = std::unique_ptr<pcidev::pci_device>(
+            new pcidev::pci_device(mdev, udev));
+        devices.push_back(std::move(dev));
+        good_dev++;
+    }
     return good_dev;
 }
 
@@ -436,6 +446,7 @@ pcidev::pci_device::pci_device(std::unique_ptr<pci_func>& mdev,
     std::unique_ptr<pci_func>& udev) :
     mgmt(std::move(mdev)), user(std::move(udev)), is_mfg(false)
 {
+#if 0
     std::string errmsg;
 
     mgmt->sysfs_get("", "ready", errmsg, is_ready);
@@ -445,6 +456,9 @@ pcidev::pci_device::pci_device(std::unique_ptr<pci_func>& mdev,
     mgmt->sysfs_get("", "mfg", errmsg, is_mfg);
     mgmt->sysfs_get("", "flash_type", errmsg, flash_type);
     mgmt->sysfs_get("", "board_name", errmsg, board_name);
+#else
+    is_ready = true;
+#endif
 }
 
 class pci_device_scanner {

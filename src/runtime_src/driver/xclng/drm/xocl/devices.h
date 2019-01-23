@@ -928,6 +928,9 @@ enum subdev_id {
 #define	XOCL_USER_QDMA_PCI_IDS						\
 	{ XOCL_PCI_DEVID(0x10EE, 0x6AA0, 0x4360, USER_QDMA) }
 
+#define	XOCL_USER_ALI_F3_PCI_IDS					\
+	{ XOCL_PCI_DEVID(0x1DED, 0x1004, PCI_ANY_ID, USER_XDMA_DSA50) }
+
 #define XOCL_DSA_VBNV_MAP						\
 	{ 0x10EE, 0x5001, PCI_ANY_ID, "xilinx_u200_xdma_201820_1",	\
 		&XOCL_BOARD_USER_XDMA },				\

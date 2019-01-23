@@ -19,7 +19,7 @@ CFLAGS += $(SHIM_INC) -fpic
 debug=1
 
 ifeq ($(debug),1)
-	CXXFLAGS += -g -DDEBUG
+	CXXFLAGS += -g
 else
 	CXXFLAGS += -O2 -DNDEBUG
 endif
