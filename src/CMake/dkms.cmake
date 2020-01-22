@@ -120,6 +120,7 @@ SET (XRT_DKMS_DRIVER_SRCS
   xocl/lib/libfdt/libfdt_env.h
   xocl/lib/libfdt/libfdt_internal.h
   xocl/subdev/xdma.c
+  xocl/subdev/xdma_lite.c
   xocl/subdev/qdma.c
   xocl/subdev/feature_rom.c
   xocl/subdev/mb_scheduler.c

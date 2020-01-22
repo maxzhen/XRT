@@ -175,6 +175,7 @@ enum {
 #define	XOCL_IORES3		"iores3"
 #define	XOCL_XDMA		"dma.xdma"
 #define	XOCL_QDMA		"dma.qdma"
+#define XOCL_XDMA_LITE		"dma.xdma_lite"
 #define	XOCL_MB_SCHEDULER	"mb_scheduler"
 #define	XOCL_XVC_PUB		"xvc_pub"
 #define	XOCL_XVC_PRI		"xvc_pri"
@@ -1152,6 +1153,24 @@ struct xocl_subdev_map {
 		ARRAY_SIZE(XOCL_RES_PS),		\
 	}
 
+#define XOCL_RES_XDMA_LITE				\
+	((struct resource []) {				\
+		{					\
+			.start = 0x0,			\
+			.end = 0x0,			\
+			.flags = IORESOURCE_MEM,	\
+		},					\
+	 })
+
+#define	XOCL_DEVINFO_XDMA_LITE				\
+	{						\
+		XOCL_SUBDEV_DMA,			\
+		XOCL_XDMA_LITE,				\
+		XOCL_RES_XDMA_LITE,			\
+		ARRAY_SIZE(XOCL_RES_XDMA_LITE),		\
+		.bar_idx = (char []){ 2 },		\
+	}
+
 #define XOCL_RES_QDMA					\
 	((struct resource []) {				\
 		{					\
@@ -1396,7 +1415,7 @@ struct xocl_subdev_map {
 #define	USER_RES_DSA52							\
 		((struct xocl_subdev_info []) {				\
 			XOCL_DEVINFO_FEATURE_ROM,			\
-			XOCL_DEVINFO_XDMA,				\
+			XOCL_DEVINFO_XDMA_LITE,				\
 			XOCL_DEVINFO_SCHEDULER,				\
 			XOCL_DEVINFO_MAILBOX_USER,			\
 			XOCL_DEVINFO_XVC_PUB,				\

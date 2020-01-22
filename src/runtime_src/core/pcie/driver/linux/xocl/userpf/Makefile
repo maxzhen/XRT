@@ -23,6 +23,7 @@ xocl-y := \
 	../xocl_thread.o \
 	../xocl_fdt.o \
 	../subdev/xdma.o \
+	../subdev/xdma_lite.o \
 	../subdev/qdma.o \
 	../subdev/feature_rom.o \
 	../subdev/mb_scheduler.o \
